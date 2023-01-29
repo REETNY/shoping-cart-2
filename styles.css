@@ -5,6 +5,10 @@
     font-family: "Montserrat", sans-serif;
 }
 
+html, body{
+    overflow-x: hidden;
+}
+
 body{
     width: 100%;
     min-height: 100vh;
@@ -210,8 +214,8 @@ main{
 }
 
 .buy-btn i{
-    font-size: 18px;
-    color: rgb(25, 38, 94);;
+    font-size: 24px;
+    color: rgb(25, 38, 94);
 }
 
 .eachProduct:hover{

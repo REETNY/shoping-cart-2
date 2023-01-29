@@ -28,12 +28,14 @@ buyBtn.forEach( (btn) => {
 
 let cartz = [];
 
+let buttonDom = [];
 
 function getProductDetails(e) {
 
     cartz = JSON.parse(localStorage.getItem("cartz")) || [];
 
     let target = e.target;
+    target.style.color = `red`;
     let parentDiv = target.parentElement.parentElement.parentElement;
     
     let productImg = parentDiv.childNodes[1].childNodes[1].src;
@@ -44,7 +46,10 @@ function getProductDetails(e) {
         return (item.price == productPrice && item.name == productName && item.image == productImg);
     })
 
+    buttonDom = []
+
     if(inCart){
+        e.target.style.color = 'red'
         InCart(e);
         return;
     }
@@ -53,14 +58,16 @@ function getProductDetails(e) {
         image: productImg,
         name: productName,
         price: productPrice,
-        amount: 1
+        amount: 1,
+        id: e.target.dataset.id
     }
 
     cartz = [cartItem, ...cartz];
     localStorage.setItem("cartz", JSON.stringify(cartz));
+    getButtonDom();
     setCartValues(cartz);
     addProductToCart(cartItem);
-    cartFunctionality1(cartz);
+    cartFunctionality1(cartz, buttonDom);
     cartFunctionality2(cartz);
 }
 
@@ -121,7 +128,28 @@ function cartFunctionality1(cartz) {
             let productImg = parentDiv.children[0].children[0].src;
             let productPrice = parentDiv.children[1].children[1].innerText.replace("$", "");
             let productName = parentDiv.children[1].children[0].innerText;
-            
+
+            let id;
+
+            cartz.forEach( item => {
+                if(item.price == productPrice && item.image == productImg && item.name == productName){
+                    id = item.id;
+                }
+            })
+
+            // gets the buttons id from the local storage
+            let cleanedBtn = JSON.parse(localStorage.getItem("buttonDom")) || [];
+            // filter the deleted item id from the ls
+            cleanedBtn = cleanedBtn.filter( item => item != id);
+            // save it back
+            localStorage.setItem("buttonDom", JSON.stringify(cleanedBtn)) || [];
+
+            buyBtn.forEach( btn => {
+                if(btn.childNodes[1].dataset.id == id){
+                    btn.childNodes[1].style.color = `rgb(25, 38, 94)`;
+                }
+            })
+
             cartz = cartz.filter( item => {
                 return (item.price != productPrice && item.image !== productImg && item.name !== productName);
             })
@@ -206,7 +234,7 @@ function InCart(e){
 
     setTimeout( () => {
         parent.removeChild(div);
-    }, 5500)
+    }, 5500);
 }
 
 
@@ -216,7 +244,21 @@ window.addEventListener("DOMContentLoaded", () => {
     setCartValues(cartz);
     populateCart(cartz);
     cartFunctionality1(cartz);
-    cartFunctionality2(cartz)
+    cartFunctionality2(cartz);
+
+    buttonDom = JSON.parse(localStorage.getItem("buttonDom")) || [];
+
+    buttonDom.forEach( (id) => {
+        let x = id;
+
+        buyBtn.forEach( btn => {
+            if(x == btn.childNodes[1].dataset.id){
+                btn.childNodes[1].style.color = `red`;
+            }
+        })
+    })
+
+    
 
 
     cartBtn.addEventListener("click", () => {
@@ -243,6 +285,14 @@ window.addEventListener("DOMContentLoaded", () => {
         }else{
             console.log("Nothing in here")
         }
+
+        // emptying the buttonDom
+        buttonDom = [];
+        localStorage.setItem("buttonDom", JSON.stringify(buttonDom));
+        //setting the button back to its previous button
+        buyBtn.forEach(btn => {
+            btn.childNodes[1].style.color = `rgb(25, 38, 94)`;
+        })
     });
 
     buyItemzBtn.addEventListener("click", () => {
@@ -259,7 +309,7 @@ window.addEventListener("DOMContentLoaded", () => {
             while(cartDom.children.length > 0){
                 cartDom.removeChild(cartDom.children[0]);
             }
-
+            scrollTo(0,0);
             orderSuccess.style.visibility = `visible`;
             successMsg.classList.add("show-msg");
 
@@ -270,6 +320,15 @@ window.addEventListener("DOMContentLoaded", () => {
         }else{
             return;
         }
+
+
+        // emptying the buttonDom
+        buttonDom = [];
+        localStorage.setItem("buttonDom", JSON.stringify(buttonDom));
+        //setting the button back to its previous button
+        buyBtn.forEach(btn => {
+            btn.childNodes[1].style.color = `rgb(25, 38, 94)`;
+        })
     });
 
     removeMsg.addEventListener("click", () => {
@@ -280,3 +339,11 @@ window.addEventListener("DOMContentLoaded", () => {
     let currYear = new Date().getFullYear();
     footerYear.innerText = currYear;
 })
+
+function getButtonDom() {
+    let itemz = JSON.parse(localStorage.getItem("cartz"));
+    itemz.forEach( item => {
+        buttonDom.push(item.id);
+    })
+    localStorage.setItem("buttonDom", JSON.stringify(buttonDom))
+}
